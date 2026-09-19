@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f4f2ed" />
+    <meta name="description" content="A private, offline workspace for reviewing long documents and exporting structured review briefs." />
+    <title>Margin - Document review workspace</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" type="image/png" href="assets/margin-logo-square.png?v=1.0.0" />
+    <link rel="apple-touch-icon" href="assets/margin-logo-square.png?v=1.0.0" />
+    <link rel="stylesheet" href="styles.css?v=1.0.0" />
+  </head>
+  <body>
+    <a class="skip-link" href="#document-editor">Skip to document</a>
+
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="topbar-leading">
+          <div class="brand" aria-label="Margin home">
+            <img class="brand-logo" src="assets/margin-logo-square.png?v=1.0.0" alt="Margin" />
+          </div>
+          <button class="icon-button panel-toggle" id="toggle-library" type="button" aria-label="Collapse document library" aria-controls="library-panel" aria-expanded="true" title="Collapse Library">
+            <span class="panel-toggle-icon icon-library" aria-hidden="true"></span>
+          </button>
+        </div>
+
+        <label class="document-name">
+          <span class="sr-only">Document title</span>
+          <input id="document-title" value="Untitled document" autocomplete="off" />
+        </label>
+
+        <div class="topbar-actions">
+          <span id="save-state" class="save-state" aria-live="polite">Saved locally</span>
+          <button class="icon-button panel-toggle" id="toggle-reviews" type="button" aria-label="Collapse review panel" aria-controls="review-panel" aria-expanded="true" title="Collapse Reviews">
+            <span class="panel-toggle-icon icon-reviews" aria-hidden="true"></span>
+          </button>
+          <button class="icon-button" id="theme-toggle" type="button" aria-label="Switch color theme" title="Switch color theme">◐</button>
+        </div>
+      </header>
+
+      <div class="workspace">
+        <aside class="library-panel panel" id="library-panel" aria-label="Document library" tabindex="-1">
+          <div class="panel-heading">
+            <h2>Library</h2>
+            <button class="icon-button mobile-only" data-close-panel="library-panel" type="button" aria-label="Close library">×</button>
+          </div>
+
+          <div class="library-actions">
+            <button class="button button-primary" id="import-trigger" type="button">Import or paste</button>
+            <button class="button button-secondary" id="new-document" type="button">New document</button>
+          </div>
+
+          <label class="search-field" for="document-search">
+            <span class="sr-only">Search documents</span>
+            <input id="document-search" type="search" placeholder="Search documents" />
+          </label>
+
+          <div class="section-label-row">
+            <div class="section-label">Documents</div>
+            <button class="clear-documents-button" id="clear-documents" type="button">Clear all</button>
+          </div>
+          <nav id="document-list" class="document-list" aria-label="Saved documents"></nav>
+
+          <div class="outline-wrap">
+            <div class="section-label">Outline</div>
+            <nav id="outline-list" class="outline-list" aria-label="Document outline">
+              <p class="muted-small">Headings appear here.</p>
+            </nav>
+          </div>
+
+          <div class="privacy-note">
+            <strong>Private by default</strong>
+            <span>Your documents stay in this browser unless you export them.</span>
+          </div>
+        </aside>
+
+        <div class="panel-resizer" id="library-resizer" role="separator" aria-label="Resize document library" aria-orientation="vertical" tabindex="0"></div>
+
+        <main class="editor-column" id="main-content">
+          <div class="format-toolbar" role="toolbar" aria-label="Document formatting">
+            <label class="format-select">
+              <span class="sr-only">Paragraph style</span>
+              <select id="block-format" title="Paragraph style">
+                <option value="p">Paragraph</option>
+                <option value="h1">Heading 1</option>
+                <option value="h2">Heading 2</option>
+                <option value="h3">Heading 3</option>
+                <option value="blockquote">Quote</option>
+              </select>
+            </label>
+            <span class="toolbar-divider" aria-hidden="true"></span>
+            <button class="toolbar-button" type="button" data-command="bold" aria-label="Bold" title="Bold"><strong>B</strong></button>
+            <button class="toolbar-button" type="button" data-command="italic" aria-label="Italic" title="Italic"><em>I</em></button>
+            <button class="toolbar-button" type="button" data-command="underline" aria-label="Underline" title="Underline"><u>U</u></button>
+            <span class="toolbar-divider" aria-hidden="true"></span>
+            <button class="toolbar-button toolbar-text" type="button" data-command="insertUnorderedList">Bullets</button>
+            <button class="toolbar-button toolbar-text" type="button" data-command="insertOrderedList">Numbered</button>
+            <div class="highlight-control">
+              <button class="toolbar-button highlight-trigger" id="highlight-menu-trigger" type="button" aria-label="Highlight selected text" aria-expanded="false" title="Highlight selected text" disabled>
+                <span class="highlight-icon" aria-hidden="true">A</span>
+              </button>
+              <div class="highlight-menu" id="highlight-menu" role="menu" aria-label="Highlight colors" hidden>
+                <button type="button" data-highlight-color="yellow" role="menuitem" aria-label="Yellow highlight"><span class="color-swatch color-yellow"></span>Yellow</button>
+                <button type="button" data-highlight-color="green" role="menuitem" aria-label="Green highlight"><span class="color-swatch color-green"></span>Green</button>
+                <button type="button" data-highlight-color="blue" role="menuitem" aria-label="Blue highlight"><span class="color-swatch color-blue"></span>Blue</button>
+                <button type="button" data-highlight-color="pink" role="menuitem" aria-label="Pink highlight"><span class="color-swatch color-pink"></span>Pink</button>
+                <hr />
+                <button type="button" data-highlight-color="clear" role="menuitem">Remove highlight</button>
+              </div>
+            </div>
+            <span class="toolbar-spacer"></span>
+            <button class="button button-quiet insert-review-button" id="add-insertion-toolbar" type="button" disabled>+ Insert here</button>
+            <button class="button button-review" id="add-review-toolbar" type="button" disabled>+ Add review</button>
+            <button class="icon-button" id="more-menu-trigger" type="button" aria-label="More document actions" aria-expanded="false">•••</button>
+            <div class="menu" id="more-menu" hidden>
+              <button type="button" id="repair-inline-code" hidden>Repair inline code placeholders</button>
+              <button type="button" data-export="doc">Export Word document</button>
+              <button type="button" data-export="pdf">Export PDF</button>
+              <button type="button" data-export="html">Export HTML</button>
+              <button type="button" data-export="markdown">Export Markdown</button>
+              <button type="button" data-export="text">Export plain text</button>
+            </div>
+          </div>
+
+          <section class="document-stage" id="document-stage" aria-label="Document editor">
+            <div class="empty-workspace" id="empty-workspace" hidden>
+              <img src="assets/margin-logo-square.png?v=1.0.0" alt="" />
+              <h1>Your library is empty</h1>
+              <p>Create a blank document or import an existing file to begin reviewing.</p>
+              <div>
+                <button class="button button-primary" id="empty-import" type="button">Import document</button>
+                <button class="button button-secondary" id="empty-new-document" type="button">New document</button>
+              </div>
+            </div>
+            <div
+              id="document-editor"
+              class="document-editor"
+              contenteditable="true"
+              role="textbox"
+              aria-multiline="true"
+              aria-label="Document content"
+              data-placeholder="Paste your text here, or import a document from the Library."
+              spellcheck="true"
+            ></div>
+
+            <div class="selection-actions" id="selection-actions" hidden>
+              <button type="button" data-review-type="question">Ask</button>
+              <button type="button" data-review-type="simplify">Simplify</button>
+              <button type="button" data-review-type="rewrite">Rewrite</button>
+              <button type="button" data-review-type="verify">Verify</button>
+              <button type="button" data-review-type="note">Note</button>
+            </div>
+
+            <div class="block-review-actions" id="block-review-actions" hidden>
+              <span id="block-review-label">Block selected</span>
+              <button type="button" id="add-block-review">Review this block</button>
+              <button type="button" id="close-block-review" aria-label="Clear block selection">×</button>
+            </div>
+
+            <div class="code-block-actions" id="code-block-actions" hidden>
+              <label for="code-language">
+                <span>Code language</span>
+                <select id="code-language">
+                  <option value="plain">Plain text</option>
+                  <option value="javascript">JavaScript</option>
+                  <option value="typescript">TypeScript</option>
+                  <option value="python">Python</option>
+                  <option value="html">HTML</option>
+                  <option value="css">CSS</option>
+                  <option value="json">JSON</option>
+                  <option value="sql">SQL</option>
+                  <option value="bash">Bash</option>
+                  <option value="powershell">PowerShell</option>
+                  <option value="java">Java</option>
+                  <option value="c">C</option>
+                  <option value="cpp">C++</option>
+                  <option value="csharp">C#</option>
+                  <option value="go">Go</option>
+                  <option value="rust">Rust</option>
+                  <option value="php">PHP</option>
+                  <option value="ruby">Ruby</option>
+                  <option value="swift">Swift</option>
+                  <option value="kotlin">Kotlin</option>
+                  <option value="r">R</option>
+                  <option value="markdown">Markdown</option>
+                  <option value="yaml">YAML</option>
+                  <option value="dockerfile">Dockerfile</option>
+                  <option value="xml">XML</option>
+                </select>
+              </label>
+              <button type="button" id="review-code-block">Review code</button>
+              <button type="button" id="copy-code-block">Copy code</button>
+              <button type="button" id="close-code-block" aria-label="Close code block controls">×</button>
+            </div>
+
+            <div class="review-marker-actions" id="review-marker-actions" hidden>
+              <span>Review highlight</span>
+              <button type="button" id="remove-review-marker">Remove highlight</button>
+              <button type="button" id="close-review-marker" aria-label="Close review highlight actions">×</button>
+            </div>
+          </section>
+
+          <footer class="document-status" aria-label="Document statistics">
+            <span id="word-count">0 words</span>
+            <span id="character-count">0 characters</span>
+            <span id="review-count">0 open reviews</span>
+            <span class="status-help">Select any passage to add a review</span>
+          </footer>
+        </main>
+
+        <div class="panel-resizer" id="review-resizer" role="separator" aria-label="Resize review panel" aria-orientation="vertical" tabindex="0"></div>
+
+        <aside class="review-panel panel" id="review-panel" aria-label="Review panel" tabindex="-1">
+          <div class="panel-heading">
+            <div>
+              <h2>Review queue</h2>
+              <p id="review-summary">No open reviews</p>
+            </div>
+            <button class="icon-button mobile-only" data-close-panel="review-panel" type="button" aria-label="Close reviews">×</button>
+          </div>
+
+          <section class="instruction-section">
+            <label for="global-instruction">Document-wide instruction</label>
+            <textarea id="global-instruction" rows="4" placeholder="For example: Keep the author’s tone, use simpler language, and retain every citation."></textarea>
+            <p>Applied together with every passage-level review.</p>
+          </section>
+
+          <div class="review-controls">
+            <div class="segmented" role="group" aria-label="Review filter">
+              <button class="active" type="button" data-filter="open">Open</button>
+              <button type="button" data-filter="all">All</button>
+            </div>
+            <button class="button button-quiet" id="export-review-pack" type="button">Export brief</button>
+          </div>
+
+          <div id="review-list" class="review-list">
+            <div class="empty-review-state">
+              <span class="empty-review-mark" aria-hidden="true">+</span>
+              <h3>No reviews yet</h3>
+              <p>Select a sentence or passage in the document, then choose what you want to ask or change.</p>
+            </div>
+          </div>
+
+        </aside>
+
+        <button class="side-panel-toggle side-panel-toggle-left" id="restore-library" type="button" aria-label="Expand document library" aria-controls="library-panel" title="Expand Library">
+          <span class="panel-toggle-icon icon-library" aria-hidden="true"></span>
+          <span class="side-panel-toggle-arrow" aria-hidden="true">›</span>
+        </button>
+        <button class="side-panel-toggle side-panel-toggle-right" id="restore-reviews" type="button" aria-label="Expand review panel" aria-controls="review-panel" title="Expand Reviews">
+          <span class="side-panel-toggle-arrow" aria-hidden="true">‹</span>
+          <span class="panel-toggle-icon icon-reviews" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+
+    <div class="scrim" id="panel-scrim" hidden></div>
+
+    <div class="review-composer" id="review-composer" hidden role="dialog" aria-labelledby="composer-title">
+      <div class="composer-head">
+        <div>
+          <span class="composer-kicker" id="composer-type">Question</span>
+          <h2 id="composer-title">Add your review</h2>
+        </div>
+        <button class="icon-button" id="composer-close" type="button" aria-label="Close review composer">×</button>
+      </div>
+      <blockquote id="composer-quote"></blockquote>
+      <label for="composer-input">What should the revision address?</label>
+      <textarea id="composer-input" rows="4" placeholder="Write your question or requested change..."></textarea>
+      <div class="composer-actions">
+        <button class="button button-quiet" id="composer-cancel" type="button">Cancel</button>
+        <button class="button button-primary" id="composer-save" type="button">Add to review queue</button>
+      </div>
+    </div>
+
+    <dialog id="import-dialog" class="dialog">
+      <form method="dialog" class="dialog-card" id="import-form">
+        <div class="dialog-heading">
+          <div>
+            <h2>Bring in your document</h2>
+            <p>Paste content or drop a file. Formatting is converted into a clean, readable document.</p>
+          </div>
+          <button class="icon-button" value="cancel" aria-label="Close import dialog">×</button>
+        </div>
+
+        <div class="import-tabs" role="tablist" aria-label="Import method">
+          <button class="active" type="button" role="tab" aria-selected="true" data-import-tab="paste">Paste content</button>
+          <button type="button" role="tab" aria-selected="false" data-import-tab="file">Choose a file</button>
+        </div>
+
+        <section id="paste-pane" class="import-pane">
+          <label for="import-paste">Paste rich text, Markdown, or plain text</label>
+          <textarea id="import-paste" rows="12" placeholder="Paste a chapter, article, manuscript, or Markdown document here..."></textarea>
+          <label class="checkbox-row">
+            <input id="paste-as-markdown" type="checkbox" />
+            <span>Treat this content as Markdown</span>
+          </label>
+        </section>
+
+        <section id="file-pane" class="import-pane" hidden>
+          <button class="drop-zone" id="drop-zone" type="button">
+            <strong>Drop a document here</strong>
+            <span>or click to choose a file</span>
+          </button>
+          <input id="file-input" type="file" hidden accept=".pdf,.docx,.md,.markdown,.txt,.html,.htm,.rtf,.csv,.json,.xml,text/*,application/pdf,application/json,application/xml,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+          <p class="format-list"><strong>Supported:</strong> PDF, Word (.docx), Markdown, text, HTML, RTF, CSV, JSON, and XML. Rich paste from Word, Google Docs, and web pages is also supported.</p>
+          <div id="selected-file" class="selected-file" hidden></div>
+        </section>
+
+        <div class="import-progress" id="import-progress" hidden aria-live="polite">
+          <progress id="import-progress-bar" max="1" value="0"></progress>
+          <span id="import-progress-text">Preparing document…</span>
+        </div>
+
+        <div class="inline-alert" id="import-error" role="alert" hidden></div>
+
+        <div class="dialog-actions">
+          <button class="button button-quiet" value="cancel">Cancel</button>
+          <button class="button button-primary" id="import-submit" value="default">Import document</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="legacy-code-dialog" class="dialog soft-dialog">
+      <form method="dialog" class="dialog-card dialog-card-small legacy-code-card" id="legacy-code-form">
+        <div class="dialog-heading">
+          <div>
+            <h2>Repair inline code</h2>
+            <p>An older app version saved placeholder labels instead of the original inline-code values. Enter the missing values once to repair this document.</p>
+          </div>
+          <button class="icon-button" value="cancel" aria-label="Repair inline code later">×</button>
+        </div>
+        <div class="legacy-code-list" id="legacy-code-list"></div>
+        <div class="inline-alert" id="legacy-code-error" role="alert" hidden></div>
+        <div class="dialog-actions">
+          <button class="button button-quiet" value="cancel">Repair later</button>
+          <button class="button button-primary" id="apply-legacy-code-repair" type="button">Apply repairs</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="delete-review-dialog" class="dialog soft-dialog">
+      <form method="dialog" class="dialog-card dialog-card-small delete-dialog-card">
+        <div class="dialog-heading">
+          <div>
+            <h2>Delete this review?</h2>
+            <p>The document text will stay in place. Only the review comment and its anchor will be removed.</p>
+          </div>
+          <button class="icon-button" value="cancel" aria-label="Close delete dialog">×</button>
+        </div>
+        <blockquote id="delete-review-quote"></blockquote>
+        <div class="dialog-actions">
+          <button class="button button-quiet" value="cancel">Keep review</button>
+          <button class="button button-danger" id="confirm-delete-review" type="button">Delete review</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="delete-document-dialog" class="dialog soft-dialog" aria-describedby="delete-document-description">
+      <form method="dialog" class="dialog-card dialog-card-small delete-dialog-card">
+        <div class="dialog-heading">
+          <div>
+            <h2>Delete this document?</h2>
+            <p id="delete-document-description">The document, its reviews, and its instructions will be permanently removed from this browser.</p>
+          </div>
+          <button class="icon-button" value="cancel" aria-label="Close delete document dialog">×</button>
+        </div>
+        <div class="document-delete-summary">
+          <span>Document</span>
+          <strong id="delete-document-title"></strong>
+          <small id="delete-document-meta"></small>
+        </div>
+        <div class="inline-alert" id="delete-document-error" role="alert" hidden></div>
+        <div class="dialog-actions">
+          <button class="button button-quiet" value="cancel">Keep document</button>
+          <button class="button button-danger" id="confirm-delete-document" type="button">Delete document</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="clear-documents-dialog" class="dialog soft-dialog" aria-describedby="clear-documents-description">
+      <form method="dialog" class="dialog-card dialog-card-small delete-dialog-card">
+        <div class="dialog-heading">
+          <div>
+            <h2>Clear the entire library?</h2>
+            <p id="clear-documents-description">This permanently removes every local document, review, insertion request, and document-wide instruction.</p>
+          </div>
+          <button class="icon-button" value="cancel" aria-label="Close clear library dialog">×</button>
+        </div>
+        <div class="destructive-warning" role="note">
+          <strong id="clear-documents-count"></strong>
+          <span>This cannot be undone. Export anything important before continuing.</span>
+        </div>
+        <label class="confirmation-field" for="clear-documents-confirmation">
+          <span>Type <strong>CLEAR ALL</strong> to confirm</span>
+          <input id="clear-documents-confirmation" autocomplete="off" spellcheck="false" />
+        </label>
+        <div class="inline-alert" id="clear-documents-error" role="alert" hidden></div>
+        <div class="dialog-actions">
+          <button class="button button-quiet" value="cancel">Keep documents</button>
+          <button class="button button-danger" id="confirm-clear-documents" type="button" disabled>Clear all documents</button>
+        </div>
+      </form>
+    </dialog>
+
+    <div class="toast-region" id="toast-region" aria-live="polite" aria-atomic="true"></div>
+
+    <script src="storage.js?v=1.0.0" defer></script>
+    <script src="parsers.js?v=1.0.0" defer></script>
+    <script src="pdf-structure.js?v=1.0.0" defer></script>
+    <script src="document-lifecycle.js?v=1.0.0" defer></script>
+    <script src="file-importers.js?v=1.0.0" defer></script>
+    <script src="app.js?v=1.0.0" defer></script>
+  </body>
+</html>

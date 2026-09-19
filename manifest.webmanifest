@@ -1,0 +1,19 @@
+{
+  "name": "Margin - Document Review Workspace",
+  "short_name": "Margin",
+  "description": "Review long documents, attach passage-level instructions, and export complete review briefs.",
+  "id": "./",
+  "scope": "./",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#ebe9e3",
+  "theme_color": "#f4f2ed",
+  "icons": [
+    {
+      "src": "assets/margin-logo-square.png",
+      "sizes": "1920x1920",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
