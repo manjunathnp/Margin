@@ -574,6 +574,11 @@ body.resizing-panels { cursor: col-resize; user-select: none; }
 
 .document-status { display: flex; align-items: center; gap: 16px; padding: 0 16px; background: var(--panel); border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; }
 .status-help { margin-left: auto; }
+.status-credit { display: inline-flex; align-items: center; gap: 4px; padding-left: 16px; border-left: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.status-credit strong { color: var(--ink-2); font-weight: 650; }
+.status-credit a { color: inherit; text-decoration: none; }
+.status-credit a:hover { color: var(--accent-ink); text-decoration: underline; text-underline-offset: 2px; }
+.status-credit a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
 
 .review-panel .panel-heading { padding: 18px 18px 12px; border-bottom: 1px solid var(--line); }
 .instruction-section { padding: 16px 18px; border-bottom: 1px solid var(--line); }
@@ -725,6 +730,7 @@ textarea { resize: vertical; }
   .library-panel.open, .review-panel.open { transform: translateX(0); }
   .editor-column { grid-column: 1; }
   .status-help { display: none; }
+  .status-credit { margin-left: auto; }
 }
 
 @media (max-width: 620px) {
@@ -969,6 +975,7 @@ textarea { resize: vertical; }
             <span id="character-count">0 characters</span>
             <span id="review-count">0 open reviews</span>
             <span class="status-help">Select any passage to add a review</span>
+            <span class="status-credit">Developed by <a href="https://manjunathnp.in" target="_blank" rel="noopener noreferrer"><strong>Manjunath N P</strong></a></span>
           </footer>
         </main>
 
